@@ -2,7 +2,6 @@
 using System.Runtime.Serialization.Formatters.Binary;
 
 
-
 StructManager structManager = new StructManager();
 structManager.LoadData();
 
@@ -21,7 +20,7 @@ while (true)
             Console.WriteLine("Введите номер авто, марку машины, пробег, имя мастера, стоимость");
             string autoNumber = Console.ReadLine();
             //список машин
-            Enums.Marks mark = (Enums.Marks)int.Parse(Console.ReadLine());
+            Mark mark = (Mark)int.Parse(Console.ReadLine());
             int mileage = int.Parse(Console.ReadLine());
             string name = Console.ReadLine();
             double price = double.Parse(Console.ReadLine());
@@ -49,14 +48,17 @@ while (true)
         case '4':
             Console.WriteLine("Выберите марку машины");
             //список машин
-            Enums.Marks mark4 = (Enums.Marks)int.Parse(Console.ReadLine());
+            Mark mark4 = (Mark)int.Parse(Console.ReadLine());
             Console.WriteLine(structManager.GetSumMileAge(mark4));
 
             break;
         case '5':
-            Console.WriteLine("Введите имя мастера");
-            var name5 = Console.ReadLine();
-            Console.WriteLine(structManager.GetSumPriceMaster(name5));
+            var PriceMaster = structManager.GetSumPriceMaster();
+            foreach(var item in PriceMaster)
+            {
+                Console.WriteLine($"Имя: {item.Key}, Сумма: {item.Value}");
+            }
+            
             break;
         case '6':
             structManager.SaveData();
@@ -71,22 +73,20 @@ while (true)
 [Serializable]
 public class StructManager
 {
-
-    List<AutoService> autoService = new List<AutoService>();
+    public const string FILE_PATH = "AutoService.txt";
+    List<AutoService> autoService = new();
 
     public void LoadData()
     {
-        var formatter = new BinaryFormatter();
-        using (var fs = new FileStream("AutoService.txt", FileMode.OpenOrCreate))
+        if (File.Exists(FILE_PATH))
         {
+            var formatter = new BinaryFormatter();
+            using var fs = new FileStream(FILE_PATH, FileMode.Open);
             if (fs.Length > 0)
-            {
                 autoService = (List<AutoService>)formatter.Deserialize(fs);
-            }
-
-            else
-                Console.WriteLine("Пусто");
         }
+        else
+            Console.WriteLine("Пусто");
     }
 
 
@@ -119,22 +119,21 @@ public class StructManager
     {
         return autoService;
     }
-    public int GetSumMileAge(Enums.Marks mark)
+    public int GetSumMileAge(Mark mark)
     {
         return autoService.Where(x => x.Mark == mark).Select(x => x.Mileage).Sum();
     }
 
-    public double GetSumPriceMaster(string name)
+    public Dictionary<string,double> GetSumPriceMaster()
     {
-        return autoService.Where(x => x.MasterName == name).Select(x => x.Price).Sum();
+            return autoService.GroupBy(x => x.MasterName, x => x.Price).ToDictionary(x=> x.Key.ToString(), value => value.Sum(x => x));
     }
 
     public void SaveData()
     {
-        BinaryFormatter formatter = new BinaryFormatter();
-        using (FileStream fs = new FileStream("AutoService.txt", FileMode.OpenOrCreate))
-        {
-            formatter.Serialize(fs, autoService);
-        }
+        var formatter = new BinaryFormatter();
+        using FileStream fs = new FileStream(FILE_PATH, FileMode.OpenOrCreate);
+        formatter.Serialize(fs, autoService);
+
     }
 }

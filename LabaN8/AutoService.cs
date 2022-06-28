@@ -2,29 +2,18 @@
 
 namespace LabaN8
 {
-    public interface Enums
-    {
-        enum Marks
-        {
-            Audi,
-            Acura,
-            AlfaRomeo,
-            Bentley,
-            BMW,
-        }
-    }
 
     [Serializable]
-    public struct AutoService : Enums
+    public struct AutoService
     {
         public string AutoNumber { get; set; }
         public int Mileage { get; set; }
         public string MasterName { get; set; }
         public double Price { get; set; }
-        public Enums.Marks Mark { get; set; }
-        
+        public Mark Mark { get; set; }
 
-        public AutoService(string autoNumber, int mileage, string masterName, double price, Enums.Marks mark)
+
+        public AutoService(string autoNumber, int mileage, string masterName, double price, Mark mark)
         {
             AutoNumber = autoNumber;
             Mileage = mileage;
@@ -38,5 +27,5 @@ namespace LabaN8
             return $"номер {AutoNumber},пробег {Mileage}, мастер {MasterName},стоимость {Price} ,марка {Mark}";
         }
     }
-    
+
 }
